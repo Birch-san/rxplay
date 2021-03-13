@@ -1,5 +1,9 @@
 module.exports = {
-  parser: '@typescript-eslint/parser',
-  plugins: ['@typescript-eslint'],
-  extends: ['plugin:@typescript-eslint/recommended'],
+  extends: 'standard-with-typescript',
+  parserOptions: {
+    project: './tsconfig.json'
+  },
+  rules: {
+    'eol-last': 'off'
+  }
 }
