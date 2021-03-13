@@ -2,9 +2,10 @@
   "name": "@birchlabs-rxplay/lib",
   "version": "1.0.0",
   "description": "",
-  "module": "public/dist/index.js",
+  "type": "module",
+  "main": "dist/index.js",
   "scripts": {
-    "start": "esbuild src/index.ts --outdir=public/dist --sourcemap --target=firefox86 --watch"
+    "start": "esbuild src/index.ts --outdir=dist --sourcemap --target=firefox86 --watch"
   },
   "author": "",
   "license": "MIT",
