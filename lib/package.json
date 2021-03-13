@@ -5,7 +5,7 @@
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
-    "start": "esbuild src/index.ts --outdir=dist --sourcemap --target=firefox86 --watch"
+    "start": "esbuild src/index.ts --bundle --outdir=dist --sourcemap --target=firefox86 --watch"
   },
   "author": "",
   "license": "MIT",
