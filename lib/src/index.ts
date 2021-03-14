@@ -1,5 +1,5 @@
-import { fromEvent, animationFrameScheduler, interval, Observable } from 'rxjs'
-import { distinctUntilChanged, map, withLatestFrom } from 'rxjs/operators'
+import { fromEvent, animationFrameScheduler, interval, Observable, MonoTypeOperatorFunction } from 'rxjs'
+import { distinctUntilChanged, filter, map, withLatestFrom } from 'rxjs/operators'
 
 function assert (x: unknown): asserts x {
   if (!(x as boolean)) {
@@ -25,7 +25,11 @@ const mouseEventToCanvasPoint = ({ clientX, clientY }: MouseEvent): Point => {
   return { x, y }
 }
 
-const canvasPoint$: Observable<Point> = fromEvent(document, 'mousemove')
+const mousePoint$: Observable<Point> = fromEvent(canvas, 'mousemove')
+  .pipe(
+    map(mouseEventToCanvasPoint)
+  )
+const mouseDown$: Observable<Point> = fromEvent(canvas, 'mousedown')
   .pipe(
     map(mouseEventToCanvasPoint)
   )
@@ -39,16 +43,26 @@ const portrait = {
   height: canvas.height / cats.vertical
 }
 
-const quadrant$: Observable<Point> = canvasPoint$.pipe(
-  map(({ x, y }: Point): Point => {
-    return {
-      x: Math.floor(x / portrait.width),
-      y: Math.floor(y / portrait.height)
-    }
-  }),
-  distinctUntilChanged(pointsEqual)
+const mapToQuadrant: MonoTypeOperatorFunction<Point> = (point$) =>
+  point$.pipe(
+    map(({ x, y }: Point): Point => {
+      return {
+        x: Math.floor(x / portrait.width),
+        y: Math.floor(y / portrait.height)
+      }
+    }),
+    distinctUntilChanged(pointsEqual)
+  )
+
+const mouseQuadrant$: Observable<Point> = mousePoint$.pipe(
+  mapToQuadrant
 )
-quadrant$.subscribe(console.log)
+mouseQuadrant$.subscribe(console.log)
+
+const mouseDownQuadrant$: Observable<Point> = mouseDown$.pipe(
+  mapToQuadrant
+)
+mouseDownQuadrant$.subscribe(console.warn)
 
 const drawPoint = (
   point: Point,
@@ -67,7 +81,8 @@ const drawPoint = (
 
 interval(1 / 30, animationFrameScheduler)
   .pipe(
-    withLatestFrom(canvasPoint$)
+    filter(() => !document.hidden),
+    withLatestFrom(mousePoint$)
   )
   .subscribe(([_interval, canvasPoint]: [number, Point]) => {
     ctx.fillStyle = '#ccc'
